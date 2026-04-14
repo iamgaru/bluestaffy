@@ -40,7 +40,7 @@ displayName="${mod_name}" #mandatory
 
 # The description text for the mod (multi line!) (#mandatory)
 description='''
-Example mod description.
+Adds an affectionate Blue Staffy companion that behaves like an upgraded wolf and can be spawned through the custom egg.
 '''
 
 # The [[mixins]] block allows you to declare your mixin config to FML so that it gets loaded.

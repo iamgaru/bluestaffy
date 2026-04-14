@@ -1,7 +1,7 @@
 {
-  "itemGroup.bluestaffy": "Example Mod Tab",
-  "block.bluestaffy.example_block": "Example Block",
-  "item.bluestaffy.example_item": "Example Item",
+  "itemGroup.bluestaffy": "Blue Staffy",
+  "entity.bluestaffy.blue_staffy": "Blue Staffy",
+  "item.bluestaffy.blue_staffy_spawn_egg": "Blue Staffy Spawn Egg",
 
   "bluestaffy.configuration.title": "Blue Staffy Configs",
   "bluestaffy.configuration.section.bluestaffy.common.toml": "Blue Staffy Configs",

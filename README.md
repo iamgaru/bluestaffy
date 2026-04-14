@@ -23,3 +23,10 @@ Additional Resources:
 ==========
 Community Documentation: https://docs.neoforged.net/  
 NeoForged Discord: https://discord.neoforged.net/
+
+Blue Staffy Companion
+======================
+- The custom Blue Staffy entity is registered under `bluestaffy:blue_staffy`. It currently extends the vanilla wolf so it behaves like a tameable canine with beefed up health (32 HP) and damage.
+- Grab the `Blue Staffy` spawn egg from the dedicated creative tab (`itemGroup.bluestaffy`) to test quickly. The egg colors follow the blue/charcoal palette used for the placeholder texture.
+- In survival, Staffies can now spawn naturally in Overworld biomes tagged with `#minecraft:is_overworld`; spawn weight is intentionally low (6) so they stay rare.
+- If you tweak behavior or stats, remember to adjust `BlueStaffyEntity#createAttributes`, the spawn placement registered during common setup, and regenerate assets if you update the texture/model.

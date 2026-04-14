@@ -1,6 +1,8 @@
 package ai.gamu.bluestaffy;
 
+import ai.gamu.bluestaffy.client.BlueStaffyRenderer;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.entity.EntityRenderers;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.ModContainer;
@@ -24,7 +26,7 @@ public class BlueStaffyClient {
 
     @SubscribeEvent
     static void onClientSetup(FMLClientSetupEvent event) {
-        // Some client setup code
+        event.enqueueWork(() -> EntityRenderers.register(BlueStaffy.BLUE_STAFFY.get(), BlueStaffyRenderer::new));
         BlueStaffy.LOGGER.info("HELLO FROM CLIENT SETUP");
         BlueStaffy.LOGGER.info("MINECRAFT NAME >> {}", Minecraft.getInstance().getUser().getName());
     }
