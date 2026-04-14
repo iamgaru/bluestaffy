@@ -6,16 +6,15 @@ import com.mojang.logging.LogUtils;
 
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
-import net.minecraft.world.entity.SpawnPlacements;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.Item;
-import net.minecraft.world.item.SpawnEggItem;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.levelgen.Heightmap;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.ModContainer;
@@ -47,10 +46,10 @@ public class BlueStaffy {
     public static final DeferredHolder<EntityType<?>, EntityType<BlueStaffyEntity>> BLUE_STAFFY = ENTITY_TYPES.register("blue_staffy",
             () -> EntityType.Builder.of(BlueStaffyEntity::new, MobCategory.CREATURE)
                     .sized(0.6f, 0.85f)
-                    .build("bluestaffy:blue_staffy"));
+                    .build(ResourceKey.create(Registries.ENTITY_TYPE, ResourceLocation.fromNamespaceAndPath(MODID, "blue_staffy"))));
 
     public static final DeferredItem<Item> BLUE_STAFFY_SPAWN_EGG = ITEMS.register("blue_staffy_spawn_egg",
-            () -> new SpawnEggItem(BLUE_STAFFY.get(), 0x284066, 0x82b8ff, new Item.Properties()));
+            () -> new BlueStaffySpawnEggItem(BLUE_STAFFY, 0x284066, 0x82b8ff, new Item.Properties()));
 
     // Creates a creative tab with the id "bluestaffy:example_tab" for the example item, that is placed after the combat tab
     public static final DeferredHolder<CreativeModeTab, CreativeModeTab> BLUE_STAFFY_TAB = CREATIVE_MODE_TABS.register("blue_staffy", () -> CreativeModeTab.builder()
@@ -97,9 +96,6 @@ public class BlueStaffy {
         LOGGER.info("{}{}", Config.MAGIC_NUMBER_INTRODUCTION.get(), Config.MAGIC_NUMBER.getAsInt());
 
         Config.ITEM_STRINGS.get().forEach((item) -> LOGGER.info("ITEM >> {}", item));
-
-        event.enqueueWork(() -> SpawnPlacements.register(BLUE_STAFFY.get(), SpawnPlacements.Type.ON_GROUND,
-                Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, BlueStaffyEntity::checkBlueStaffySpawnRules));
     }
 
     private void addCreative(BuildCreativeModeTabContentsEvent event) {
