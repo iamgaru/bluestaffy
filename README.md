@@ -1,7 +1,6 @@
 # Blue Staffy
 
-<!-- Banner image — drop your PNG here and update the path below -->
-<!-- ![Blue Staffy](docs/banner.png) -->
+![Blue Staffy](docs/banner.png)
 
 A Minecraft mod that adds the Blue Staffordshire Bull Terrier as a tameable companion — with its own personality, behaviours, and that unmistakable Staffy energy.
 
