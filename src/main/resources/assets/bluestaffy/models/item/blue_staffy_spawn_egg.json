@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "bluestaffy:item/blue_staffy_spawn_egg"
+  }
+}

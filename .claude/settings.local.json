@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(jar tf *)",
+      "Read(//private/tmp/**)",
+      "Bash(jar xf *)",
+      "Read(//tmp/net/minecraft/world/entity/**)",
+      "Bash(./gradlew compileJava)"
+    ]
+  }
+}
