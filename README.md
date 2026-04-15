@@ -1,6 +1,10 @@
 # Blue Staffy
 
-A Minecraft mod that adds the Blue Staffordshire Bull Terrier as a unique tameable companion — with its own personality, behaviours, and that unmistakable Staffy energy.
+<p align="center">
+  <img src="docs/banner.png" alt="Blue Staffy" />
+</p>
+
+A Minecraft mod that adds the Blue Staffordshire Bull Terrier as a tameable companion — with its own personality, behaviours, and that unmistakable Staffy energy.
 
 Built with [NeoForge](https://neoforged.net/) for Minecraft **1.21.11**.
 
@@ -8,30 +12,76 @@ Built with [NeoForge](https://neoforged.net/) for Minecraft **1.21.11**.
 
 ## What's in the mod
 
-- **Blue Staffy entity** — a tameable dog with wolf-level AI as its foundation
-- **Spawn egg** — find it in the Blue Staffy creative tab
-- Unique appearance, behaviours, and personality planned (see roadmap below)
-
----
-
-## Roadmap
-
 ### Appearance
-- [ ] Custom Blockbench model (stockier build than a wolf — wider chest, shorter legs)
-- [ ] Proper blue-gray texture with white chest marking
+- [x] Custom entity model — Staffy proportions (wide skull, rose ears, barrel chest, short thick legs, stub tail)
+- [x] Blue-gray texture with white chest blaze and small dark eyes
+- [x] Baby/puppy variant via `BabyModelTransform`
+- [ ] Proper Blockbench-quality texture
 - [ ] Collar variants
 
 ### Behaviours
-- [ ] **Zoomies** — random bursts of high-speed sprinting, especially after a bath or when excited
-- [ ] Taming with specific food items
-- [ ] Sitting, following, and staying loyal to owner
-- [ ] Unique idle animations (head tilt, wiggle bum)
-- [ ] Sounds (huffs, snorts, excited barking)
 
-### Future
-- [ ] Puppy variant
+#### Zoomies
+The signature behaviour. Triggers in three situations:
+
+| Trigger | Duration |
+|---|---|
+| Fed any wolf food (cooked meat etc.) while under full health | 6–9 s |
+| Owner right-clicks to unsit the dog | 3–5 s |
+| Dog exits water onto solid ground (post-bath sprint) | 3–5 s |
+
+While zooming the dog sprints at **2.5× normal speed** in tight, erratic arcs (direction changes every 5–7 ticks). Zoomies override all other goals — sit, follow, wander, and attack — at priority 0. A wolf bark/growl plays the moment they start.
+
+**Collision damage:** anything the Staffy runs into while zooming (mobs, players, armour stands) takes **1.5 damage** (¾ heart). A 1-second cooldown prevents hitting the same target every tick.
+
+#### Other behaviours
+- **Idle head tilt** — while standing still the head gently tilts side-to-side (~10°, ~1.7 s period). Stops the moment the dog starts moving.
+- **Resting whimper** — occasional soft whimper while sitting (~25 s average gap).
+- **Idle oink/snort sounds** — Staffies are notorious snorters.
+- Taming, sitting, following, and loyalty (inherited from Wolf)
+
+### Roadmap
+- [ ] Excited greeting — mini-zoomie when owner comes close (goal exists, not yet active)
+- [ ] Unique idle animations (wiggle bum)
+- [ ] Sounds (growls, excited barking)
+- [ ] Puppy variant (model layer exists; texture and behaviour pending)
 - [ ] Toy interactions
 - [ ] Named dog support
+
+---
+
+## Installing the mod in Minecraft Java Edition
+
+### Prerequisites
+1. **Minecraft Java Edition** (version 1.21.11)
+2. **NeoForge 21.11.42** — download the installer from [neoforged.net](https://neoforged.net/) and run it:
+   ```
+   java -jar neoforge-21.11.42-installer.jar
+   ```
+   This creates a NeoForge profile in the Minecraft Launcher.
+
+### Build and install
+
+```bash
+make build   # compile and package the mod
+make jar     # print the path to the distributable JAR
+```
+
+Copy the JAR printed by `make jar` into your Minecraft mods folder:
+
+| OS | Mods folder |
+|---|---|
+| macOS | `~/Library/Application Support/minecraft/mods/` |
+| Windows | `%APPDATA%\.minecraft\mods\` |
+| Linux | `~/.minecraft/mods/` |
+
+Create the `mods/` folder if it doesn't exist, then launch Minecraft, select the **NeoForge 1.21.11** profile, and click Play.
+
+To spawn one in Creative mode:
+```
+/summon bluestaffy:blue_staffy
+```
+Or find the spawn egg in the **Blue Staffy** creative tab.
 
 ---
 
@@ -39,34 +89,17 @@ Built with [NeoForge](https://neoforged.net/) for Minecraft **1.21.11**.
 
 ### Requirements
 - Java 21
-- [IntelliJ IDEA](https://www.jetbrains.com/idea/) or Eclipse (IntelliJ recommended)
+- [IntelliJ IDEA](https://www.jetbrains.com/idea/) (recommended) or Eclipse
 
-### Getting started
-
-```bash
-git clone <this repo>
-cd bluestaffy
-./gradlew build
-```
-
-### Run the client (test world)
+### Commands
 
 ```bash
-./gradlew runClient
-```
-
-Once in game, switch to **Creative mode**, open the **Blue Staffy** tab, and use the spawn egg to summon one.
-
-You can also use the command:
-```
-/summon bluestaffy:blue_staffy
-```
-
-### Refresh dependencies if something breaks
-
-```bash
-./gradlew --refresh-dependencies
-./gradlew clean build
+make build   # compile and package
+make run     # launch Minecraft client for live testing
+make clean   # wipe build artefacts
+make deps    # force-refresh dependencies if something breaks
+make jar     # build and print the JAR path
+make help    # list all targets
 ```
 
 ---
@@ -76,16 +109,21 @@ You can also use the command:
 ```
 src/main/java/ai/gamu/bluestaffy/
   BlueStaffy.java              # Mod entry point, registrations
-  BlueStaffyClient.java        # Client-only setup (renderers)
+  BlueStaffyClient.java        # Client-only setup (renderers, model layers)
   Config.java                  # Mod config
   entity/
-    BlueStaffyEntity.java      # The dog entity (extends Wolf)
+    BlueStaffyEntity.java      # Dog entity — zoomies triggers, sounds, collision damage
+    goal/
+      ZoomiesGoal.java         # AI goal: 2.5× speed erratic sprint, priority 0
+      GreetOwnerGoal.java      # Reserved: greeting mini-zoomie (not yet active)
   client/
+    model/
+      BlueStaffyModel.java     # Custom entity model + idle head tilt animation
     renderer/
       BlueStaffyRenderer.java  # Entity renderer
 
 src/main/resources/assets/bluestaffy/
-  textures/entity/             # Entity skin
+  textures/entity/             # Entity skin (64×64, blue-gray + white chest blaze)
   textures/item/               # Spawn egg texture
   models/                      # Item + block models
   items/                       # Item definitions (1.21.11 format)
@@ -102,7 +140,7 @@ src/main/resources/assets/bluestaffy/
 | Minecraft | 1.21.11 |
 | Mod loader | NeoForge 21.11.42 |
 | Language | Java 21 |
-| Build tool | Gradle |
+| Build tool | Gradle (via `make`) |
 | Mappings | Parchment 2025.12.20 |
 
 ---
@@ -110,9 +148,9 @@ src/main/resources/assets/bluestaffy/
 ## Notes for contributors
 
 - Entity model work is done in [Blockbench](https://www.blockbench.net/) — export as a Java entity model
-- The `BlueStaffyEntity` extends `Wolf` giving us taming, pathfinding, and sitting for free. Custom behaviours are added as AI goals
+- `BlueStaffyEntity` extends `Wolf`, giving taming, pathfinding, and sitting for free. Custom behaviours are added as AI goals
 - Item models use the 1.21.11 `assets/<mod>/items/` definition format alongside traditional `models/item/` files
-- Run `./gradlew runClient` to test — no need to install the mod separately during development
+- Run `make run` to test — no need to install the mod separately during development
 
 ---
 

@@ -1,5 +1,7 @@
 package ai.gamu.bluestaffy;
 
+import ai.gamu.bluestaffy.client.model.BlueStaffyModel;
+import net.minecraft.client.model.geom.builders.LayerDefinition;
 import ai.gamu.bluestaffy.client.renderer.BlueStaffyRenderer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.world.entity.animal.wolf.Wolf;
@@ -13,10 +15,10 @@ import net.neoforged.neoforge.client.event.EntityRenderersEvent;
 import net.neoforged.neoforge.client.gui.ConfigurationScreen;
 import net.neoforged.neoforge.client.gui.IConfigScreenFactory;
 
-// This class will not load on dedicated servers. Accessing client side code from here is safe.
 @Mod(value = BlueStaffy.MODID, dist = Dist.CLIENT)
 @EventBusSubscriber(modid = BlueStaffy.MODID, value = Dist.CLIENT)
 public class BlueStaffyClient {
+
     public BlueStaffyClient(ModContainer container) {
         container.registerExtensionPoint(IConfigScreenFactory.class, ConfigurationScreen::new);
     }
@@ -26,14 +28,26 @@ public class BlueStaffyClient {
         BlueStaffy.LOGGER.info("Blue Staffy client setup");
     }
 
+    /** Register the adult and baby model layer definitions. */
+    @SubscribeEvent
+    static void onRegisterLayerDefinitions(EntityRenderersEvent.RegisterLayerDefinitions event) {
+        event.registerLayerDefinition(BlueStaffyModel.LAYER_LOCATION,
+                BlueStaffyModel::createBodyLayer);
+        event.registerLayerDefinition(BlueStaffyModel.BABY_LAYER_LOCATION,
+                () -> LayerDefinition.create(
+                        BlueStaffyModel.BABY_TRANSFORMER.apply(BlueStaffyModel.createMeshDefinition()),
+                        64, 64));
+    }
+
+    /** Register the entity renderer. */
     @SuppressWarnings({"unchecked", "rawtypes"})
     @SubscribeEvent
     static void onRegisterEntityRenderers(EntityRenderersEvent.RegisterRenderers event) {
-        // Cast needed because BlueStaffyRenderer is typed to Wolf (its parent),
-        // but our entity IS a Wolf so this is safe at runtime.
+        // BlueStaffyRenderer is typed to Wolf (the parent class).
+        // BlueStaffyEntity IS a Wolf, so this cast is safe at runtime.
         event.registerEntityRenderer(
-                (net.minecraft.world.entity.EntityType<Wolf>) (net.minecraft.world.entity.EntityType<?>) BlueStaffy.BLUE_STAFFY.get(),
-                BlueStaffyRenderer::new
-        );
+                (net.minecraft.world.entity.EntityType<Wolf>) (net.minecraft.world.entity.EntityType<?>)
+                        BlueStaffy.BLUE_STAFFY.get(),
+                BlueStaffyRenderer::new);
     }
 }
