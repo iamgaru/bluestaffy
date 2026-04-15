@@ -2,6 +2,8 @@ package ai.gamu.bluestaffy.entity;
 
 import ai.gamu.bluestaffy.BlueStaffy;
 import net.minecraft.resources.Identifier;
+import net.minecraft.sounds.SoundEvent;
+import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.animal.wolf.Wolf;
 import net.minecraft.world.level.Level;
@@ -19,4 +21,10 @@ public class BlueStaffyEntity extends Wolf {
     public Identifier getTexture() {
         return TEXTURE;
     }
+
+    @Override
+    protected SoundEvent getAmbientSound() {
+        return SoundEvents.PIG_AMBIENT;
+    }
+
 }
