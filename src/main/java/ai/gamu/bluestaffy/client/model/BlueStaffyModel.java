@@ -224,6 +224,12 @@ public class BlueStaffyModel extends EntityModel<WolfRenderState> {
         this.head.xRot = state.xRot * (float) (Math.PI / 180.0);
         this.head.yRot = state.yRot * (float) (Math.PI / 180.0);
 
+        // Behaviour 4: idle head tilt — gentle sine-wave roll when standing still,
+        // giving the classic curious-dog "what's that?" expression.
+        if (state.walkAnimationSpeed < 0.05F) {
+            this.head.zRot += Mth.sin(state.ageInTicks * 0.06F) * 0.18F;
+        }
+
         this.tail.xRot = state.tailAngle;
     }
 }
