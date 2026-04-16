@@ -26,16 +26,22 @@ The signature behaviour. Triggers in three situations:
 
 | Trigger | Duration |
 |---|---|
-| Fed any wolf food (cooked meat etc.) while under full health | 6–9 s |
+| Fed cooked steak while under full health | **14–18 s** + excited barking |
+| Fed any other wolf food while under full health | 6–9 s |
 | Owner right-clicks to unsit the dog | 3–5 s |
 | Dog exits water onto solid ground (post-bath sprint) | 3–5 s |
 
 While zooming the dog sprints at **2.5× normal speed** in tight, erratic arcs (direction changes every 5–7 ticks). Zoomies override all other goals — sit, follow, wander, and attack — at priority 0. A wolf bark/growl plays the moment they start.
 
+**Cooked steak bonus:** triggers a burst of three barks at the moment of feeding, then the dog barks every 1.5–3 s throughout the run.
+
 **Collision damage:** anything the Staffy runs into while zooming (mobs, players, armour stands) takes **1.5 damage** (¾ heart). A 1-second cooldown prevents hitting the same target every tick.
 
 #### Other behaviours
-- **Idle head tilt** — while standing still the head gently tilts side-to-side (~10°, ~1.7 s period). Stops the moment the dog starts moving.
+- **Idle head tilt** — while standing still the head tilts side-to-side with smooth ease-in/ease-out. Three variations cycle randomly (~8 s period, stops the moment the dog moves):
+  - *Single tilt* (~50%) — tilts to one side, holds, returns to centre
+  - *Sweep* (~25%) — tilts to one side then flows continuously through to the other without stopping
+  - *Quick-then-slow* (~25%) — snaps quickly to one side, then drifts at a slightly slower speed to the other
 - **Resting whimper** — occasional soft whimper while sitting (~25 s average gap).
 - **Idle oink/snort sounds** — Staffies are notorious snorters.
 - Taming, sitting, following, and loyalty (inherited from Wolf)
