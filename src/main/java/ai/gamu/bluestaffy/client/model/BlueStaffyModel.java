@@ -16,9 +16,6 @@ import net.minecraft.client.model.geom.builders.PartDefinition;
 import net.minecraft.client.renderer.entity.state.WolfRenderState;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
-
 /**
  * Custom entity model for the Blue Staffy dog.
  *
@@ -39,7 +36,6 @@ import net.neoforged.api.distmarker.OnlyIn;
  *   (12, 23) Hind legs     3×6×3   → 12×9
  *   ( 0, 32) Tail          3×5×3   → 12×8
  */
-@OnlyIn(Dist.CLIENT)
 public class BlueStaffyModel extends EntityModel<WolfRenderState> {
 
     public static final ModelLayerLocation LAYER_LOCATION = new ModelLayerLocation(
@@ -224,10 +220,58 @@ public class BlueStaffyModel extends EntityModel<WolfRenderState> {
         this.head.xRot = state.xRot * (float) (Math.PI / 180.0);
         this.head.yRot = state.yRot * (float) (Math.PI / 180.0);
 
-        // Behaviour 4: idle head tilt — gentle sine-wave roll when standing still,
-        // giving the classic curious-dog "what's that?" expression.
+        // Behaviour 4: idle head tilt — fluid, three modes chosen per cycle:
+        //   mode 0,1 (~50%): single tilt — ease in → hold → ease out → pause
+        //   mode 2   (~25%): sweep       — ease in → hold → cosine sweep to other side → hold → ease out → pause
+        //   mode 3   (~25%): quick-slow  — quick snap to one side, slow drift to the other → hold → ease out
         if (state.walkAnimationSpeed < 0.05F) {
-            this.head.zRot += Mth.sin(state.ageInTicks * 0.06F) * 0.18F;
+            float phase = state.ageInTicks % 160.0F;
+            int   cycle = (int)(state.ageInTicks / 160.0F);
+            int   hash  = cycle * 0x9e3779b9;
+            float dir   = (hash & 0x80000000) != 0 ? 1.0F : -1.0F;
+            int   mode  = (hash >>> 29) & 0x3; // bits 29-30 → 0,1,2,3
+
+            float tilt = 0.0F;
+            if (mode <= 1) {
+                // Single tilt: ease-in 12t, hold 48t, ease-out 12t, pause 88t
+                if (phase < 12.0F) {
+                    tilt = dir * 0.52F * Mth.sin((phase / 12.0F) * (float)(Math.PI / 2));
+                } else if (phase < 60.0F) {
+                    tilt = dir * 0.52F;
+                } else if (phase < 72.0F) {
+                    tilt = dir * 0.52F * Mth.sin(((72.0F - phase) / 12.0F) * (float)(Math.PI / 2));
+                }
+            } else if (mode == 2) {
+                // Sweep: ease-in 12t, hold 18t, cosine sweep 40t, hold 18t, ease-out 12t, pause 60t
+                if (phase < 12.0F) {
+                    tilt = dir * 0.52F * Mth.sin((phase / 12.0F) * (float)(Math.PI / 2));
+                } else if (phase < 30.0F) {
+                    tilt = dir * 0.52F;
+                } else if (phase < 70.0F) {
+                    float t = (phase - 30.0F) / 40.0F;
+                    tilt = dir * 0.52F * Mth.cos(t * (float)Math.PI); // dir → 0 → -dir
+                } else if (phase < 88.0F) {
+                    tilt = -dir * 0.52F;
+                } else if (phase < 100.0F) {
+                    tilt = -dir * 0.52F * Mth.sin(((100.0F - phase) / 12.0F) * (float)(Math.PI / 2));
+                }
+            } else {
+                // Quick-then-slow: snap to one side (8t), brief hold (10t),
+                // drift to the other side at almost the same speed (11t), hold (28t), ease-out (9t), pause 94t
+                if (phase < 8.0F) {
+                    tilt = dir * 0.52F * Mth.sin((phase / 8.0F) * (float)(Math.PI / 2));
+                } else if (phase < 18.0F) {
+                    tilt = dir * 0.52F;
+                } else if (phase < 29.0F) {
+                    float t = (phase - 18.0F) / 11.0F;
+                    tilt = dir * 0.52F * Mth.cos(t * (float)Math.PI); // dir → -dir
+                } else if (phase < 57.0F) {
+                    tilt = -dir * 0.52F;
+                } else if (phase < 66.0F) {
+                    tilt = -dir * 0.52F * Mth.sin(((66.0F - phase) / 9.0F) * (float)(Math.PI / 2));
+                }
+            }
+            this.head.zRot += tilt;
         }
 
         this.tail.xRot = state.tailAngle;
