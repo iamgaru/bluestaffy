@@ -7,6 +7,7 @@ import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
@@ -31,6 +32,12 @@ public class BlueStaffyEntity extends Wolf {
 
     /** Cooldown before the dog can deal ram damage again (prevents per-tick spam). */
     private int ramCooldown = 0;
+
+    /** True while doing a steak-triggered zoomie — enables periodic excited barking. */
+    private boolean steakExcited = false;
+
+    /** Countdown between excited barks during a steak zoomie. */
+    private int barkCooldown = 0;
 
     public BlueStaffyEntity(EntityType<? extends Wolf> type, Level level) {
         super(type, level);
@@ -81,7 +88,10 @@ public class BlueStaffyEntity extends Wolf {
 
     /** Decrements the timer each tick; called from ZoomiesGoal. */
     public void tickZoomies() {
-        if (zoomTicks > 0) zoomTicks--;
+        if (zoomTicks > 0) {
+            zoomTicks--;
+            if (zoomTicks == 0) steakExcited = false;
+        }
     }
 
     // ── Trigger 1: food, and Trigger 2: unsitting ──────────────────────────────
@@ -91,14 +101,24 @@ public class BlueStaffyEntity extends Wolf {
         ItemStack item = player.getItemInHand(hand);
 
         // Snapshot state before super() can mutate it
-        boolean willFeed    = item.is(ItemTags.WOLF_FOOD) && this.isTame() && this.getHealth() < this.getMaxHealth();
-        boolean wasSitting  = this.isOrderedToSit();
+        boolean isSteakTreat = item.is(Items.COOKED_BEEF) && this.isTame() && this.getHealth() < this.getMaxHealth();
+        boolean willFeed     = item.is(ItemTags.WOLF_FOOD)  && this.isTame() && this.getHealth() < this.getMaxHealth();
+        boolean wasSitting   = this.isOrderedToSit();
 
         InteractionResult result = super.mobInteract(player, hand);
 
         if (!this.level().isClientSide() && result.consumesAction()) {
-            if (willFeed) {
-                // Fed — full zoomies burst (6–9 s)
+            if (isSteakTreat) {
+                // Cooked steak — extra long zoomies (14–18 s) with excited bark burst
+                startZoomies(280 + this.random.nextInt(80));
+                steakExcited = true;
+                barkCooldown = 0;
+                // Three quick barks at the moment of feeding
+                playZoomiesStartSound();
+                playZoomiesStartSound();
+                playZoomiesStartSound();
+            } else if (willFeed) {
+                // Other wolf food — standard zoomies burst (6–9 s)
                 startZoomies(120 + this.random.nextInt(60));
             } else if (wasSitting && !this.isOrderedToSit()) {
                 // Player unsit the dog — excited sprint (3–5 s)
@@ -126,6 +146,17 @@ public class BlueStaffyEntity extends Wolf {
         // Resting whimper — quiet fox-sleep sound while sitting (~25 s average gap)
         if (this.isInSittingPose() && !this.isSilent() && this.random.nextInt(500) == 0) {
             this.playSound(SoundEvents.FOX_SLEEP, 0.4F, 1.0F + this.random.nextFloat() * 0.2F);
+        }
+
+        // Periodic barking during steak-triggered zoomies
+        if (isZooming() && steakExcited) {
+            if (barkCooldown > 0) {
+                barkCooldown--;
+            } else {
+                playZoomiesStartSound();
+                // bark every 1.5–3 s (30–60 ticks)
+                barkCooldown = 30 + this.random.nextInt(30);
+            }
         }
 
         // Collision (ram) damage while zooming

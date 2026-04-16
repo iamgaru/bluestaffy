@@ -16,9 +16,6 @@ import net.minecraft.client.model.geom.builders.PartDefinition;
 import net.minecraft.client.renderer.entity.state.WolfRenderState;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
-
 /**
  * Custom entity model for the Blue Staffy dog.
  *
@@ -39,7 +36,6 @@ import net.neoforged.api.distmarker.OnlyIn;
  *   (12, 23) Hind legs     3×6×3   → 12×9
  *   ( 0, 32) Tail          3×5×3   → 12×8
  */
-@OnlyIn(Dist.CLIENT)
 public class BlueStaffyModel extends EntityModel<WolfRenderState> {
 
     public static final ModelLayerLocation LAYER_LOCATION = new ModelLayerLocation(
@@ -224,10 +220,44 @@ public class BlueStaffyModel extends EntityModel<WolfRenderState> {
         this.head.xRot = state.xRot * (float) (Math.PI / 180.0);
         this.head.yRot = state.yRot * (float) (Math.PI / 180.0);
 
-        // Behaviour 4: idle head tilt — gentle sine-wave roll when standing still,
-        // giving the classic curious-dog "what's that?" expression.
+        // Behaviour 4: idle head tilt — fluid with random direction each cycle.
+        // 160-tick period (~8 s). Two modes chosen per cycle (~50/50):
+        //   Single: ease in → hold → ease out → pause
+        //   Sweep:  ease in → brief hold → cosine sweep to other side → hold → ease out → pause
         if (state.walkAnimationSpeed < 0.05F) {
-            this.head.zRot += Mth.sin(state.ageInTicks * 0.06F) * 0.18F;
+            float phase  = state.ageInTicks % 160.0F;
+            int   cycle  = (int)(state.ageInTicks / 160.0F);
+            int   hash   = cycle * 0x9e3779b9;
+            float dir    = (hash & 0x80000000) != 0 ? 1.0F : -1.0F;
+            boolean sweep = (hash & 0x40000000) != 0;
+
+            float tilt = 0.0F;
+            if (!sweep) {
+                // Single tilt: ease-in 12t, hold 48t, ease-out 12t, pause 88t
+                if (phase < 12.0F) {
+                    tilt = dir * 0.52F * Mth.sin((phase / 12.0F) * (float)(Math.PI / 2));
+                } else if (phase < 60.0F) {
+                    tilt = dir * 0.52F;
+                } else if (phase < 72.0F) {
+                    tilt = dir * 0.52F * Mth.sin(((72.0F - phase) / 12.0F) * (float)(Math.PI / 2));
+                }
+            } else {
+                // Sweep: ease-in 12t, hold 18t, cosine sweep to other side 40t, hold 18t, ease-out 12t, pause 60t
+                if (phase < 12.0F) {
+                    tilt = dir * 0.52F * Mth.sin((phase / 12.0F) * (float)(Math.PI / 2));
+                } else if (phase < 30.0F) {
+                    tilt = dir * 0.52F;
+                } else if (phase < 70.0F) {
+                    // cosine interpolation: dir → 0 → -dir
+                    float t = (phase - 30.0F) / 40.0F;
+                    tilt = dir * 0.52F * Mth.cos(t * (float)Math.PI);
+                } else if (phase < 88.0F) {
+                    tilt = -dir * 0.52F;
+                } else if (phase < 100.0F) {
+                    tilt = -dir * 0.52F * Mth.sin(((100.0F - phase) / 12.0F) * (float)(Math.PI / 2));
+                }
+            }
+            this.head.zRot += tilt;
         }
 
         this.tail.xRot = state.tailAngle;
