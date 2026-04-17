@@ -2,13 +2,13 @@ package ai.gamu.bluestaffy.client.renderer;
 
 import ai.gamu.bluestaffy.BlueStaffy;
 import ai.gamu.bluestaffy.client.model.BlueStaffyModel;
+import ai.gamu.bluestaffy.entity.BlueStaffyEntity;
 import net.minecraft.client.renderer.entity.AgeableMobRenderer;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
-import net.minecraft.client.renderer.entity.state.WolfRenderState;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.animal.wolf.Wolf;
 
-public class BlueStaffyRenderer extends AgeableMobRenderer<Wolf, WolfRenderState, BlueStaffyModel> {
+public class BlueStaffyRenderer extends AgeableMobRenderer<Wolf, BlueStaffyRenderState, BlueStaffyModel> {
 
     private static final Identifier TEXTURE =
             Identifier.fromNamespaceAndPath(BlueStaffy.MODID, "textures/entity/bluestaffy.png");
@@ -21,26 +21,30 @@ public class BlueStaffyRenderer extends AgeableMobRenderer<Wolf, WolfRenderState
     }
 
     @Override
-    public Identifier getTextureLocation(WolfRenderState state) {
+    public Identifier getTextureLocation(BlueStaffyRenderState state) {
         return TEXTURE;
     }
 
     @Override
-    public WolfRenderState createRenderState() {
-        return new WolfRenderState();
+    public BlueStaffyRenderState createRenderState() {
+        return new BlueStaffyRenderState();
     }
 
     @Override
-    public void extractRenderState(Wolf entity, WolfRenderState state, float partialTick) {
+    public void extractRenderState(Wolf entity, BlueStaffyRenderState state, float partialTick) {
         super.extractRenderState(entity, state, partialTick);
         state.isAngry       = entity.isAngry();
         state.isSitting     = entity.isInSittingPose();
         state.tailAngle     = entity.getTailAngle();
         state.headRollAngle = entity.getHeadRollAngle(partialTick);
         state.shakeAnim     = entity.getShakeAnim(partialTick);
-        state.texture       = entity.getTexture();   // overridden in BlueStaffyEntity
+        state.texture       = entity.getTexture();
         state.wetShade      = entity.getWetShade(partialTick);
         state.collarColor   = entity.isTame() ? entity.getCollarColor() : null;
         state.bodyArmorItem = entity.getBodyArmorItem().copy();
+        if (entity instanceof BlueStaffyEntity staffy) {
+            state.isNapping      = staffy.isNapping();
+            state.isSideFlopping = staffy.isSideFlopping();
+        }
     }
 }

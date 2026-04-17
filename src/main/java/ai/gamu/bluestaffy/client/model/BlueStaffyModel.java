@@ -13,6 +13,7 @@ import net.minecraft.client.model.geom.builders.LayerDefinition;
 import net.minecraft.client.model.geom.builders.MeshDefinition;
 import net.minecraft.client.model.geom.builders.MeshTransformer;
 import net.minecraft.client.model.geom.builders.PartDefinition;
+import ai.gamu.bluestaffy.client.renderer.BlueStaffyRenderState;
 import net.minecraft.client.renderer.entity.state.WolfRenderState;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
@@ -36,7 +37,7 @@ import net.minecraft.util.Mth;
  *   (12, 23) Hind legs     3×6×3   → 12×9
  *   ( 0, 32) Tail          3×5×3   → 12×8
  */
-public class BlueStaffyModel extends EntityModel<WolfRenderState> {
+public class BlueStaffyModel extends EntityModel<BlueStaffyRenderState> {
 
     public static final ModelLayerLocation LAYER_LOCATION = new ModelLayerLocation(
             Identifier.fromNamespaceAndPath(BlueStaffy.MODID, "blue_staffy"), "main");
@@ -56,6 +57,13 @@ public class BlueStaffyModel extends EntityModel<WolfRenderState> {
     private final ModelPart leftFrontLeg;
     private final ModelPart tail;
     private final ModelPart realTail;
+
+    /** Smooth nap progress (0 = awake, 1 = fully napping). Persists across frames. */
+    private float napProgress  = 0.0F;
+    /** Smooth side-flop progress (0 = upright, 1 = fully flopped). Persists across frames. */
+    private float sideProgress = 0.0F;
+    /** Side direction for the current flop (±1), chosen when flop begins. */
+    private float sideDir      = 1.0F;
 
     public BlueStaffyModel(ModelPart root) {
         super(root);
@@ -168,7 +176,7 @@ public class BlueStaffyModel extends EntityModel<WolfRenderState> {
     // Mirrors WolfModel.setupAnim() — same behaviour, different geometry.
 
     @Override
-    public void setupAnim(WolfRenderState state) {
+    public void setupAnim(BlueStaffyRenderState state) {
         super.setupAnim(state);
 
         float walkPos   = state.walkAnimationPos;
@@ -275,5 +283,42 @@ public class BlueStaffyModel extends EntityModel<WolfRenderState> {
         }
 
         this.tail.xRot = state.tailAngle;
+
+        // ── NAP ANIMATION ──────────────────────────────────────────────────────
+        // napProgress eases between 0 (awake) and 1 (fully napping) each frame.
+        // The model instance persists, so this interpolation is stable across ticks.
+        napProgress = state.isNapping
+                ? Math.min(1.0F, napProgress + 0.04F)   // ~0.8 s ease-in
+                : Math.max(0.0F, napProgress - 0.08F);  // ~0.4 s ease-out
+
+        if (napProgress > 0.01F) {
+            // Head droops forward
+            this.head.xRot += napProgress * 0.5F;
+
+            // Gentle breathing oscillation (body + head rise and fall together)
+            float breathe = Mth.sin(state.ageInTicks * 0.04F) * 0.03F * napProgress;
+            this.body.y  += breathe;
+            this.head.y  += breathe * 0.5F;
+        }
+
+        // Side-flop: server controls timing; we just ease sideProgress to match.
+        // When a new flop begins (sideProgress was ~0 and flag just turned on),
+        // pick a new direction so consecutive flops alternate or feel random.
+        if (state.isSideFlopping) {
+            if (sideProgress < 0.05F) {
+                // Just started — choose direction from current ageInTicks so it varies
+                sideDir = ((int)(state.ageInTicks) & 1) == 0 ? 1.0F : -1.0F;
+            }
+            sideProgress = Math.min(1.0F, sideProgress + 0.03F); // ~1.1 s ease-in
+        } else {
+            sideProgress = Math.max(0.0F, sideProgress - 0.04F); // ~0.8 s ease-out
+        }
+
+        if (sideProgress > 0.001F) {
+            float roll = sideProgress * napProgress * (float)(Math.PI / 2);
+            this.body.zRot      += sideDir * roll;
+            this.upperBody.zRot += sideDir * roll;
+            this.head.zRot      += sideDir * roll * 0.55F; // head lolls but not as far
+        }
     }
 }

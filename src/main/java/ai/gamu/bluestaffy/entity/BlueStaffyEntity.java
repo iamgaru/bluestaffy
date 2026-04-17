@@ -1,7 +1,11 @@
 package ai.gamu.bluestaffy.entity;
 
 import ai.gamu.bluestaffy.BlueStaffy;
+import ai.gamu.bluestaffy.entity.goal.NapGoal;
 import ai.gamu.bluestaffy.entity.goal.ZoomiesGoal;
+import net.minecraft.network.syncher.EntityDataAccessor;
+import net.minecraft.network.syncher.EntityDataSerializers;
+import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.resources.Identifier;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
@@ -20,6 +24,11 @@ import net.minecraft.world.phys.AABB;
 import java.util.List;
 
 public class BlueStaffyEntity extends Wolf {
+
+    private static final EntityDataAccessor<Boolean> DATA_NAPPING =
+            SynchedEntityData.defineId(BlueStaffyEntity.class, EntityDataSerializers.BOOLEAN);
+    private static final EntityDataAccessor<Boolean> DATA_SIDE_FLOPPING =
+            SynchedEntityData.defineId(BlueStaffyEntity.class, EntityDataSerializers.BOOLEAN);
 
     private static final Identifier TEXTURE =
             Identifier.fromNamespaceAndPath(BlueStaffy.MODID, "textures/entity/bluestaffy.png");
@@ -42,6 +51,19 @@ public class BlueStaffyEntity extends Wolf {
     public BlueStaffyEntity(EntityType<? extends Wolf> type, Level level) {
         super(type, level);
     }
+
+    @Override
+    protected void defineSynchedData(SynchedEntityData.Builder builder) {
+        super.defineSynchedData(builder);
+        builder.define(DATA_NAPPING, false);
+        builder.define(DATA_SIDE_FLOPPING, false);
+    }
+
+    public boolean isNapping()      { return this.entityData.get(DATA_NAPPING); }
+    public void setNapping(boolean v) { this.entityData.set(DATA_NAPPING, v); }
+
+    public boolean isSideFlopping()      { return this.entityData.get(DATA_SIDE_FLOPPING); }
+    public void setSideFlopping(boolean v) { this.entityData.set(DATA_SIDE_FLOPPING, v); }
 
     // ── Appearance ─────────────────────────────────────────────────────────────
 
@@ -75,6 +97,8 @@ public class BlueStaffyEntity extends Wolf {
         super.registerGoals();
         // Priority 0: zoomies override everything (sit, follow, attack, wander)
         this.goalSelector.addGoal(0, new ZoomiesGoal(this));
+        // Priority 9: nap when tamed, sitting, and idle — very low priority
+        this.goalSelector.addGoal(9, new NapGoal(this));
     }
 
     // ── Zoomies API ────────────────────────────────────────────────────────────
