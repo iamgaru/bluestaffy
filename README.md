@@ -41,7 +41,11 @@ While zooming the dog sprints at **2.5× normal speed** in tight, erratic arcs (
 - **Idle head tilt** — while standing still the head tilts side-to-side with smooth ease-in/ease-out. Three variations cycle randomly (~8 s period, stops the moment the dog moves):
   - *Single tilt* (~50%) — tilts to one side, holds, returns to centre
   - *Sweep* (~25%) — tilts to one side then flows continuously through to the other without stopping
-  - *Quick-then-slow* (~25%) — snaps quickly to one side, then drifts at a slightly slower speed to the other
+  - *Quick-then-slow* (~25%) — snaps to one side, then drifts at a slightly slower speed to the other
+- **Napping** — when tamed and sitting quietly the dog will doze off (15–45 s sessions). While asleep:
+  - Head droops forward with a gentle breathing rise-and-fall
+  - Occasional sighs play at random pitch (high, low, mid — unpredictable, like a sleeping dog)
+  - Periodically (every 35–55 s) the dog flops to its side for 12–18 s with a deeper settling sigh as it goes down, then rights itself again
 - **Resting whimper** — occasional soft whimper while sitting (~25 s average gap).
 - **Idle oink/snort sounds** — Staffies are notorious snorters.
 - Taming, sitting, following, and loyalty (inherited from Wolf)
