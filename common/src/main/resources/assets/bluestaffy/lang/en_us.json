@@ -1,0 +1,17 @@
+{
+  "itemGroup.bluestaffy": "Blue Staffy",
+
+  "entity.bluestaffy.blue_staffy": "Blue Staffy",
+  "item.bluestaffy.blue_staffy_spawn_egg": "Blue Staffy Spawn Egg",
+
+  "block.bluestaffy.example_block": "Example Block",
+  "item.bluestaffy.example_item": "Example Item",
+
+  "bluestaffy.configuration.title": "Blue Staffy Configs",
+  "bluestaffy.configuration.section.bluestaffy.common.toml": "Blue Staffy Configs",
+  "bluestaffy.configuration.section.bluestaffy.common.toml.title": "Blue Staffy Configs",
+  "bluestaffy.configuration.items": "Item List",
+  "bluestaffy.configuration.logDirtBlock": "Log Dirt Block",
+  "bluestaffy.configuration.magicNumberIntroduction": "Magic Number Text",
+  "bluestaffy.configuration.magicNumber": "Magic Number"
+}

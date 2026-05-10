@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "id": "bluestaffy",
+  "version": "${version}",
+  "name": "Blue Staffy",
+  "description": "A Blue Staffy companion for Minecraft.",
+  "authors": ["iamgaru"],
+  "contact": {
+    "sources": "https://github.com/iamgaru/bluestaffy"
+  },
+  "license": "All Rights Reserved",
+  "icon": "assets/bluestaffy/icon.png",
+  "environment": "*",
+  "entrypoints": {
+    "main": ["ai.gamu.bluestaffy.fabric.BlueStaffyFabric"],
+    "client": ["ai.gamu.bluestaffy.fabric.client.BlueStaffyFabricClient"]
+  },
+  "depends": {
+    "fabricloader": ">=0.16",
+    "fabric-api": "*",
+    "minecraft": "~1.21",
+    "java": ">=21"
+  }
+}
