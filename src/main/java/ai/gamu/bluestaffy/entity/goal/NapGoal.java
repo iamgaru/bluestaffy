@@ -35,7 +35,7 @@ public class NapGoal extends Goal {
 
     public NapGoal(BlueStaffyEntity staffy) {
         this.staffy = staffy;
-        this.setFlags(EnumSet.of(Flag.LOOK)); // hold the head in place while dozing
+        this.setFlags(EnumSet.noneOf(Flag.class)); // no flag conflicts — animation is purely model-side
     }
 
     @Override
@@ -45,7 +45,7 @@ public class NapGoal extends Goal {
                 && !staffy.isZooming()
                 && !staffy.isInWater()
                 && staffy.onGround()
-                && staffy.getRandom().nextInt(200) == 0; // ~10 s average before triggering
+                && staffy.getRandom().nextInt(50) == 0; // ~10 s average (goal eval runs every 4 ticks)
     }
 
     @Override
