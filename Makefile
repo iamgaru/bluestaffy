@@ -1,27 +1,39 @@
 # Blue Staffy mod — convenience targets
 # Usage: make <target>
 
-.PHONY: build run clean deps jar help
+.PHONY: build build-fabric build-neoforge run-fabric run-neoforge clean jar-fabric jar-neoforge help
 
 help:
 	@echo "Targets:"
-	@echo "  make build   — compile and package the mod JAR"
-	@echo "  make run     — launch Minecraft client for in-game testing"
-	@echo "  make clean   — delete build artefacts"
-	@echo "  make deps    — force-refresh all Gradle dependencies"
-	@echo "  make jar     — build and print the path to the distributable JAR"
+	@echo "  make build            — compile and package both Fabric and NeoForge JARs"
+	@echo "  make build-fabric     — Fabric JAR only"
+	@echo "  make build-neoforge   — NeoForge JAR only"
+	@echo "  make run-fabric       — launch Fabric client for in-game testing"
+	@echo "  make run-neoforge     — launch NeoForge client for in-game testing"
+	@echo "  make clean            — delete build artefacts"
+	@echo "  make jar-fabric       — build and print the Fabric JAR path"
+	@echo "  make jar-neoforge     — build and print the NeoForge JAR path"
 
 build:
-	./gradlew build
+	./gradlew :fabric:build :neoforge:build
 
-run:
-	./gradlew runClient
+build-fabric:
+	./gradlew :fabric:build
+
+build-neoforge:
+	./gradlew :neoforge:build
+
+run-fabric:
+	./gradlew :fabric:runClient
+
+run-neoforge:
+	./gradlew :neoforge:runClient
 
 clean:
 	./gradlew clean
 
-deps:
-	./gradlew --refresh-dependencies clean build
+jar-fabric: build-fabric
+	@ls fabric/build/libs/*.jar | grep -v dev-shadow
 
-jar: build
-	@ls build/libs/*.jar | grep -v sources | grep -v slim
+jar-neoforge: build-neoforge
+	@ls neoforge/build/libs/*.jar | grep -v dev-shadow

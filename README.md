@@ -6,7 +6,7 @@
 
 A Minecraft mod that adds the Blue Staffordshire Bull Terrier as a tameable companion — with its own personality, behaviours, and that unmistakable Staffy energy.
 
-Built with [NeoForge](https://neoforged.net/) for Minecraft **1.21.11**.
+Available for **Fabric** and **NeoForge** on Minecraft **1.21.11**.
 
 ---
 
@@ -60,38 +60,45 @@ While zooming the dog sprints at **2.5× normal speed** in tight, erratic arcs (
 
 ---
 
-## Installing the mod in Minecraft Java Edition
+## Installing the mod
 
-### Prerequisites
-1. **Minecraft Java Edition** (version 1.21.11)
-2. **NeoForge 21.11.42** — download the installer from [neoforged.net](https://neoforged.net/) and run it:
+### Fabric
+
+1. Install **Fabric Loader 0.19.2** via the [Fabric Installer](https://fabricmc.net/use/installer/)
+2. Install **Fabric API 0.141.3+1.21.11** — drop the Fabric API JAR into your mods folder
+3. Drop `bluestaffy-<version>.jar` into your mods folder
+
+```bash
+make build-fabric   # produces fabric/build/libs/bluestaffy-1.0.0.jar
+```
+
+### NeoForge
+
+1. Install **NeoForge 21.11.42** — download the installer from [neoforged.net](https://neoforged.net/) and run it:
    ```
    java -jar neoforge-21.11.42-installer.jar
    ```
-   This creates a NeoForge profile in the Minecraft Launcher.
-
-### Build and install
+2. Drop `bluestaffy-<version>.jar` into your mods folder
 
 ```bash
-make build   # compile and package the mod
-make jar     # print the path to the distributable JAR
+make build-neoforge   # produces neoforge/build/libs/bluestaffy-21.11.42.jar
 ```
 
-Copy the JAR printed by `make jar` into your Minecraft mods folder:
+### Mods folder location
 
-| OS | Mods folder |
+| OS | Path |
 |---|---|
 | macOS | `~/Library/Application Support/minecraft/mods/` |
 | Windows | `%APPDATA%\.minecraft\mods\` |
 | Linux | `~/.minecraft/mods/` |
 
-Create the `mods/` folder if it doesn't exist, then launch Minecraft, select the **NeoForge 1.21.11** profile, and click Play.
+Create the `mods/` folder if it doesn't exist, then launch Minecraft with the correct loader profile and click Play.
 
 To spawn one in Creative mode:
 ```
 /summon bluestaffy:blue_staffy
 ```
-Or find the spawn egg in the **Blue Staffy** creative tab.
+Or find the spawn egg in the **Blue Staffy** creative tab (NeoForge) or the Spawn Eggs tab (Fabric).
 
 ---
 
@@ -104,12 +111,15 @@ Or find the spawn egg in the **Blue Staffy** creative tab.
 ### Commands
 
 ```bash
-make build   # compile and package
-make run     # launch Minecraft client for live testing
-make clean   # wipe build artefacts
-make deps    # force-refresh dependencies if something breaks
-make jar     # build and print the JAR path
-make help    # list all targets
+make build            # compile and package both Fabric and NeoForge JARs
+make build-fabric     # Fabric JAR only
+make build-neoforge   # NeoForge JAR only
+make run-fabric       # launch Fabric client for live testing
+make run-neoforge     # launch NeoForge client for live testing
+make clean            # wipe build artefacts
+make jar-fabric       # build and print the Fabric JAR path
+make jar-neoforge     # build and print the NeoForge JAR path
+make help             # list all targets
 ```
 
 ---
@@ -117,22 +127,36 @@ make help    # list all targets
 ## Project structure
 
 ```
-src/main/java/ai/gamu/bluestaffy/
-  BlueStaffy.java              # Mod entry point, registrations
-  BlueStaffyClient.java        # Client-only setup (renderers, model layers)
-  Config.java                  # Mod config
+common/src/main/java/ai/gamu/bluestaffy/
+  BlueStaffy.java              # Mod initialiser — registrations, MOD_ID
   entity/
     BlueStaffyEntity.java      # Dog entity — zoomies triggers, sounds, collision damage
     goal/
       ZoomiesGoal.java         # AI goal: 2.5× speed erratic sprint, priority 0
+      NapGoal.java             # Napping detection helper
       GreetOwnerGoal.java      # Reserved: greeting mini-zoomie (not yet active)
   client/
     model/
       BlueStaffyModel.java     # Custom entity model + idle head tilt animation
     renderer/
       BlueStaffyRenderer.java  # Entity renderer
+      BlueStaffyRenderState.java
+  registry/
+    ModEntities.java           # Entity type registration
+    ModItems.java              # Spawn egg + item registration
+    ModBlocks.java             # Block registration
 
-src/main/resources/assets/bluestaffy/
+fabric/src/main/java/ai/gamu/bluestaffy/fabric/
+  BlueStaffyFabric.java        # Fabric mod initialiser (ModInitializer)
+  client/
+    BlueStaffyFabricClient.java # Fabric client initialiser (ClientModInitializer)
+
+neoforge/src/main/java/ai/gamu/bluestaffy/neoforge/
+  BlueStaffyNeoForge.java      # NeoForge @Mod entry point + creative tab
+  client/
+    BlueStaffyNeoForgeClient.java # NeoForge client event subscriber
+
+common/src/main/resources/assets/bluestaffy/
   textures/entity/             # Entity skin (64×64, blue-gray + white chest blaze)
   textures/item/               # Spawn egg texture
   models/                      # Item + block models
@@ -148,9 +172,12 @@ src/main/resources/assets/bluestaffy/
 | | |
 |---|---|
 | Minecraft | 1.21.11 |
-| Mod loader | NeoForge 21.11.42 |
+| Fabric Loader | 0.19.2 |
+| Fabric API | 0.141.3+1.21.11 |
+| NeoForge | 21.11.42 |
+| Architectury API | 19.0.1 |
 | Language | Java 21 |
-| Build tool | Gradle (via `make`) |
+| Build tool | Gradle 9 + Architectury Loom 1.14 |
 | Mappings | Parchment 2025.12.20 |
 
 ---
@@ -159,8 +186,9 @@ src/main/resources/assets/bluestaffy/
 
 - Entity model work is done in [Blockbench](https://www.blockbench.net/) — export as a Java entity model
 - `BlueStaffyEntity` extends `Wolf`, giving taming, pathfinding, and sitting for free. Custom behaviours are added as AI goals
+- All entity logic lives in `common/` — neither the `fabric/` nor `neoforge/` modules touch game behaviour
 - Item models use the 1.21.11 `assets/<mod>/items/` definition format alongside traditional `models/item/` files
-- Run `make run` to test — no need to install the mod separately during development
+- Run `make run-fabric` or `make run-neoforge` to test in-game — no need to install the mod separately
 
 ---
 
