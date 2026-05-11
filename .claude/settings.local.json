@@ -10,7 +10,8 @@
       "Bash(python3 *)",
       "Bash(unzip -p /Users/nickconolly/.gradle/caches/neoformruntime/intermediate_results/sourcesAndCompiledWithNeoForge_902e96f849cf2ff2ab96fc42686279f41b29565a_output.jar net/minecraft/sounds/SoundEvents.java)",
       "Bash(unzip -p /Users/nickconolly/.gradle/caches/neoformruntime/intermediate_results/sourcesAndCompiledWithNeoForge_902e96f849cf2ff2ab96fc42686279f41b29565a_output.jar net/minecraft/world/entity/ai/attributes/AttributeModifier.java)",
-      "Bash(unzip -p /Users/nickconolly/.gradle/caches/neoformruntime/intermediate_results/sourcesAndCompiledWithNeoForge_902e96f849cf2ff2ab96fc42686279f41b29565a_output.jar net/minecraft/world/entity/ai/attributes/AttributeInstance.java)"
+      "Bash(unzip -p /Users/nickconolly/.gradle/caches/neoformruntime/intermediate_results/sourcesAndCompiledWithNeoForge_902e96f849cf2ff2ab96fc42686279f41b29565a_output.jar net/minecraft/world/entity/ai/attributes/AttributeInstance.java)",
+      "Bash(xargs ls *)"
     ]
   }
 }
